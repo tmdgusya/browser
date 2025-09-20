@@ -2,6 +2,7 @@ import socket
 import ssl
 import sys
 
+from http import HttpBuilder
 
 class URL:
   
@@ -31,7 +32,12 @@ class URL:
       if self.scheme == "https":
         ctx = ssl.create_default_context()
         s = ctx.wrap_socket(s, server_hostname=self.host)
-      s.send(f"GET {self.path} HTTP/1.1\r\nHost: {self.host}\r\nConnection: close\r\n\r\n".encode())
+      request_builder = HttpBuilder()
+      request_builder = request_builder.set_method("GET")
+      request_builder = request_builder.set_http_version("HTTP/1.0")
+      request_builder = request_builder.set_path(self.path)
+      request_builder = request_builder.set_host(self.host)
+      s.send(request_builder.build())
       response = s.makefile("r", encoding="utf-8", newline="\r\n")
 
       statusline = response.readline()
