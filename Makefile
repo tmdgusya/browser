@@ -3,3 +3,6 @@ test-1:
 
 test-2:
 	uv run -m src.url file://1.txt
+
+test-3:
+	uv run -m src.url view-source:http://browser.engineering/examples/example1-simple.html

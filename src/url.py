@@ -10,14 +10,14 @@ class URL:
   
   def __init__(self, url: str) -> None:
     self.scheme, url = url.split("://", 1)
-    assert self.scheme in ["http", "https", "file"]
-
-    if self.scheme in ["http", "https"]:
+    assert self.scheme in ["http", "https", "file", "view-source:http", "view-source:https"]
+    if self.scheme in ["http", "https", "view-source:http", "view-source:https"]:
       if "/" not in url:
         url += "/"
-      if self.scheme == "https":
+      if "https" in self.scheme:
+        print("here")
         self.port = 443
-      if self.scheme == "http":
+      if "http" in self.scheme:
         self.port = 80
       self.host, url = url.split("/", 1)
       if ":" in self.host:
@@ -35,7 +35,7 @@ class URL:
         proto=socket.IPPROTO_TCP,
       )
       s.connect((self.host, self.port))
-      if self.scheme == "https":
+      if "https" in self.scheme:
         ctx = ssl.create_default_context()
         s = ctx.wrap_socket(s, server_hostname=self.host)
       request_builder = HttpBuilder()
@@ -79,17 +79,23 @@ class URL:
         print(body)
       
   def show(self, body: str):
-    in_tag = False
+    show_with_out_tag: bool = False if "view-source" in self.scheme else True
     printed = ""
-    for c in body:
-      if c == "<":
-        in_tag = True
-      elif c == ">":
-        in_tag = False
-      elif not in_tag:
-        printed += c
-        print(c, end="")
     
+    if show_with_out_tag:
+      in_tag = False
+      for c in body:
+        if c == "<":
+          in_tag = True
+        elif c == ">":
+          in_tag = False
+        elif not in_tag:
+          printed += f"{c}"
+    else:
+      for c in body:
+        printed += f"{c}"
+    
+    print(printed)
     printed = printed.replace("&lt;", "<")
     printed = printed.replace("&gt;", ">")
     return printed
