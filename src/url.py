@@ -3,7 +3,7 @@ import ssl
 import sys
 
 from typing import Literal
-from http import HttpBuilder
+from .http import HttpBuilder
 
 SUPPORT_SCHEME = Literal["http", "https", "file"]
 class URL:
@@ -80,14 +80,19 @@ class URL:
       
   def show(self, body: str):
     in_tag = False
-    print(f"body: {body}")
+    printed = ""
     for c in body:
       if c == "<":
         in_tag = True
       elif c == ">":
         in_tag = False
       elif not in_tag:
+        printed += c
         print(c, end="")
+    
+    printed = printed.replace("&lt;", "<")
+    printed = printed.replace("&gt;", ">")
+    return printed
   
   def load(self):
     if self.scheme == "file":

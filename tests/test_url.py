@@ -77,3 +77,13 @@ def test_validate_parsing_port_with_path():
   assert url.port == 8080
   url = URL("https://example.com:8080/path")
   assert url.port == 8080
+
+def test_show_lt_and_gt_as_tag():
+  url = URL("http://example.com:8080")
+  text = url.show("<html><div><p>&lt;p&gt;</p></div></html>")
+  assert text == "<p>"
+  
+def test_show_lt_and_gt_as_tag_2():
+  url = URL("http://example.com:8080")
+  text = url.show("<html><div><p>&lt;p&gt;</p>&lt;div&gt;</div></html>")
+  assert text == "<p><div>"
