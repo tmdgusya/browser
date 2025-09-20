@@ -30,3 +30,38 @@ def test_validate_path_with_query():
   assert url.scheme == "http"
   assert url.host == "example.com"
   assert url.path == "/path?query=value"
+  
+def test_validate_https_url():
+  url = URL("https://example.com")
+  assert url.scheme == "https"
+  assert url.host == "example.com"
+  assert url.path == "/"
+  
+def test_validate_https_url_with_path():
+  url = URL("https://example.com/path")
+  assert url.scheme == "https"
+  assert url.host == "example.com"
+  assert url.path == "/path"
+  
+def test_validate_https_url_with_query():
+  url = URL("https://example.com/path?query=value")
+  assert url.scheme == "https"
+  assert url.host == "example.com"
+  assert url.path == "/path?query=value"
+  
+def test_validate_https_url_with_query_and_fragment():
+  url = URL("https://example.com/path?query=value#fragment")
+  assert url.scheme == "https"
+  assert url.host == "example.com"
+
+def test_validate_parser_proper_port():
+  url = URL("http://example.com")
+  assert url.port == 80
+  url = URL("https://example.com")
+  assert url.port == 443
+  
+def test_validate_parser_proper_port_with_path():
+  url = URL("http://example.com/path")
+  assert url.port == 80
+  url = URL("https://example.com/path")
+  assert url.port == 443
