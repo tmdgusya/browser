@@ -1,5 +1,6 @@
 import socket
 import ssl
+import sys
 
 
 class URL:
@@ -14,6 +15,9 @@ class URL:
     else:
       self.port = 80
     self.host, url = url.split("/", 1)
+    if ":" in self.host:
+      self.host, self.port = self.host.split(":", 1)
+      self.port = int(self.port)
     self.path = "/" + url
   
   def requests(self) -> str:
@@ -69,5 +73,5 @@ class URL:
     self.show(body)
   
 if __name__ == "__main__":
-  url = URL("http://example.org/")
+  url = URL(sys.argv[1])
   url.load()

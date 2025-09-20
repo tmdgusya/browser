@@ -65,3 +65,15 @@ def test_validate_parser_proper_port_with_path():
   assert url.port == 80
   url = URL("https://example.com/path")
   assert url.port == 443
+  
+def test_validate_parsing_port_with_host():
+  url = URL("http://example.com:8080")
+  assert url.port == 8080
+  url = URL("https://example.com:8080")
+  assert url.port == 8080
+  
+def test_validate_parsing_port_with_path():
+  url = URL("http://example.com:8080/path")
+  assert url.port == 8080
+  url = URL("https://example.com:8080/path")
+  assert url.port == 8080
