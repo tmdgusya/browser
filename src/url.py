@@ -21,7 +21,7 @@ class URL:
         proto=socket.IPPROTO_TCP,
       )
       s.connect((self.host, 80))
-      s.send(f"GET {self.path} HTTP/1.1\r\nHost: {self.host}\r\n\r\n".encode())
+      s.send(f"GET {self.path} HTTP/1.1\r\nHost: {self.host}\r\nConnection: close\r\n\r\n".encode())
       response = s.makefile("r", encoding="utf-8", newline="\r\n")
 
       statusline = response.readline()
@@ -34,12 +34,34 @@ class URL:
         line = response.readline()
         if line == "\r\n": break
         header, value = line.split(": ", 1)
-        response_headers[header] = value
-
-      response_body = response.read()
-      response.close()
+        response_headers[header.casefold()] = value
+      
+      if 'content-length' in response_headers:
+        content_length = int(response_headers['content-length'].strip())
+        response_body = response.read(content_length)
+      else:
+        response_body = response.read()
       return response_body
     except Exception as e:
       raise e
     finally:
       s.close()
+      
+  def show(self, body: str):
+    in_tag = False
+    print(f"body: {body}")
+    for c in body:
+      if c == "<":
+        in_tag = True
+      elif c == ">":
+        in_tag = False
+      elif not in_tag:
+        print(c, end="")
+  
+  def load(self):
+    body = self.requests()
+    self.show(body)
+  
+if __name__ == "__main__":
+  url = URL("http://example.org/")
+  url.load()
