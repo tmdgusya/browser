@@ -2,24 +2,30 @@ import socket
 import ssl
 import sys
 
+from typing import Literal
 from http import HttpBuilder
 
+SUPPORT_SCHEME = Literal["http", "https", "file"]
 class URL:
   
   def __init__(self, url: str) -> None:
     self.scheme, url = url.split("://", 1)
-    assert self.scheme in ["http", "https"]
-    if "/" not in url:
-      url += "/"
-    if self.scheme == "https":
-      self.port = 443
-    else:
-      self.port = 80
-    self.host, url = url.split("/", 1)
-    if ":" in self.host:
-      self.host, self.port = self.host.split(":", 1)
-      self.port = int(self.port)
-    self.path = "/" + url
+    assert self.scheme in ["http", "https", "file"]
+
+    if self.scheme in ["http", "https"]:
+      if "/" not in url:
+        url += "/"
+      if self.scheme == "https":
+        self.port = 443
+      if self.scheme == "http":
+        self.port = 80
+      self.host, url = url.split("/", 1)
+      if ":" in self.host:
+        self.host, self.port = self.host.split(":", 1)
+        self.port = int(self.port)
+      self.path = "/" + url
+    if self.scheme in ["file"]:
+      self.path = url
   
   def requests(self) -> str:
     try:
@@ -62,6 +68,15 @@ class URL:
       raise e
     finally:
       s.close()
+  
+  def read_file(self):
+    assert self.scheme == "file"
+    
+    with open(self.path, "r+") as f:
+      while True:
+        body = f.readline()
+        if len(body) == 0: break
+        print(body)
       
   def show(self, body: str):
     in_tag = False
@@ -75,8 +90,11 @@ class URL:
         print(c, end="")
   
   def load(self):
-    body = self.requests()
-    self.show(body)
+    if self.scheme == "file":
+      self.read_file()
+    else:
+      body = self.requests()
+      self.show(body)
   
 if __name__ == "__main__":
   url = URL(sys.argv[1])
