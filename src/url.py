@@ -71,12 +71,13 @@ class URL:
   
   def read_file(self):
     assert self.scheme == "file"
-    
+    body = ""
     with open(self.path, "r+") as f:
       while True:
-        body = f.readline()
+        body += f.readline()
         if len(body) == 0: break
-        print(body)
+
+    return body
       
   def show(self, body: str):
     show_with_out_tag: bool = False if "view-source" in self.scheme else True
@@ -95,17 +96,16 @@ class URL:
       for c in body:
         printed += f"{c}"
     
-    print(printed)
     printed = printed.replace("&lt;", "<")
     printed = printed.replace("&gt;", ">")
     return printed
   
-  def load(self):
+  def load(self) -> str:
     if self.scheme == "file":
-      self.read_file()
+      return self.read_file()
     else:
       body = self.requests()
-      self.show(body)
+      return self.show(body)
   
 if __name__ == "__main__":
   url = URL(sys.argv[1])
