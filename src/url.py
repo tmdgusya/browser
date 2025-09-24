@@ -2,8 +2,17 @@ import socket
 import ssl
 import sys
 
-from typing import Literal
+from dataclasses import dataclass
+from typing import List, Literal
 from .http import HttpBuilder
+
+@dataclass
+class Text:
+  text: str
+  
+@dataclass
+class Tag:
+  tag: str
 
 SUPPORT_SCHEME = Literal["http", "https", "file"]
 class URL:
@@ -71,36 +80,44 @@ class URL:
   
   def read_file(self):
     assert self.scheme == "file"
-    body = ""
+    buffer = []
     with open(self.path, "r+") as f:
       while True:
-        body += f.readline()
-        if len(body) == 0: break
+        text = f.readline()
+        buffer.append(text)
+        if len(text) == 0: break
 
-    return body
+    return buffer
       
   def show(self, body: str):
+    out = []
+    buffer = ""
     show_with_out_tag: bool = False if "view-source" in self.scheme else True
-    printed = ""
+    in_tag = False
     
     if show_with_out_tag:
-      in_tag = False
       for c in body:
         if c == "<":
           in_tag = True
+          if buffer: out.append(Text(buffer)) # flush
+          buffer = ""
         elif c == ">":
           in_tag = False
+          out.append(Tag(buffer))
+          buffer = ""
         elif not in_tag:
-          printed += f"{c}"
+          buffer += c
     else:
       for c in body:
-        printed += f"{c}"
+        buffer += c
     
-    printed = printed.replace("&lt;", "<")
-    printed = printed.replace("&gt;", ">")
-    return printed
+
+    
+    if not in_tag and buffer:
+      out.append(Text(buffer))
+    return out
   
-  def load(self) -> str:
+  def lex(self) -> List[str]:
     if self.scheme == "file":
       return self.read_file()
     else:
@@ -109,4 +126,4 @@ class URL:
   
 if __name__ == "__main__":
   url = URL(sys.argv[1])
-  url.load()
+  url.lex()
