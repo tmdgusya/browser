@@ -8,4 +8,4 @@ test-3:
 	uv run -m src.url view-source:http://browser.engineering/examples/example1-simple.html
 
 test-4:
-	uv run -m src.browser http://browser.engineering/history.html
+	uv run -m src.browser http://browser.engineering/widgets/lab3-browser.html
